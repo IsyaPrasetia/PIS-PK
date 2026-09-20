@@ -7,6 +7,7 @@ use App\Http\Controllers\FamilyController;
 use App\Http\Controllers\ImporController;
 use App\Http\Controllers\IndikatorController;
 use App\Http\Controllers\RekapController;
+use App\Http\Controllers\SegmentationController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WilayahController;
 use Illuminate\Support\Facades\Route;
@@ -29,6 +30,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/keluarga/{family}', [FamilyController::class, 'destroy'])->name('families.destroy');
 
     Route::get('/rekap', [RekapController::class, 'index'])->name('rekap.index');
+    Route::get('/segmentasi', [SegmentationController::class, 'index'])->name('segmentasi.index');
     Route::get('/indikator', [IndikatorController::class, 'index'])->name('indikator.index');
 
     Route::get('/impor', [ImporController::class, 'index'])->name('impor.index');

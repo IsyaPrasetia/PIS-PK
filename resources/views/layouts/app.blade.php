@@ -15,6 +15,7 @@
         ['id' => 'dashboard', 'icon' => '&#9673;', 'label' => 'Dasbor', 'route' => 'dashboard', 'active' => request()->routeIs('dashboard'), 'visible' => !$isPetugas],
         ['id' => 'list', 'icon' => '&#9776;', 'label' => 'Data Keluarga', 'route' => 'families.index', 'active' => request()->routeIs('families.*'), 'visible' => true],
         ['id' => 'rekap', 'icon' => '&#128202;', 'label' => 'Rekap IKS Wilayah', 'route' => 'rekap.index', 'active' => request()->routeIs('rekap.index'), 'visible' => !$isPetugas],
+        ['id' => 'segmentasi', 'icon' => '&#127919;', 'label' => 'Segmentasi Keluarga', 'route' => 'segmentasi.index', 'active' => request()->routeIs('segmentasi.index'), 'visible' => !$isPetugas],
         ['id' => 'form', 'icon' => '&#9998;', 'label' => 'Input Keluarga', 'route' => 'families.create', 'active' => request()->routeIs('families.create'), 'visible' => true],
         ['id' => 'ai', 'icon' => '&#10022;', 'label' => 'Input dengan AI', 'route' => 'ai.index', 'active' => request()->routeIs('ai.index'), 'visible' => true],
         ['id' => 'excel', 'icon' => '&#128196;', 'label' => 'Impor dari Excel', 'route' => 'impor.index', 'active' => request()->routeIs('impor.index'), 'visible' => !$isPetugas],

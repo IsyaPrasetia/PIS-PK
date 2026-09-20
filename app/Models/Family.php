@@ -164,6 +164,22 @@ class Family extends Model
     /**
      * Batasi kueri ke wilayah yang boleh diakses pengguna.
      */
+    /**
+     * Filter berjenjang kecamatan → desa → RW → RT berdasarkan parameter query.
+     *
+     * @param  array{kecamatan: string, desa: string, rw: string, rt: string}  $filters
+     */
+    public function scopeCascadeWilayah(Builder $query, array $filters): Builder
+    {
+        foreach (['kecamatan', 'desa', 'rw', 'rt'] as $column) {
+            if (($filters[$column] ?? '') !== '') {
+                $query->where($column, $filters[$column]);
+            }
+        }
+
+        return $query;
+    }
+
     public function scopeScopedFor(Builder $query, ?User $user): Builder
     {
         if ($user === null || $user->isSuperadmin()) {

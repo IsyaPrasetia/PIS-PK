@@ -70,5 +70,57 @@ class UserSeeder extends Seeder
                 'created_by' => $adminWilayah->id,
             ],
         );
+
+        $adminWilayahSepatan = User::firstOrCreate(
+            ['email' => 'wilayah-sepatan@pispk.test'],
+            [
+                'name' => 'Admin Wilayah Sepatan',
+                'password' => bcrypt('rahasia123'),
+                'role' => UserRole::AdminWilayah->value,
+                'kecamatan' => 'SEPATAN',
+                'created_by' => $superadmin->id,
+            ],
+        );
+
+        User::firstOrCreate(
+            ['email' => 'rw-sepatan@pispk.test'],
+            [
+                'name' => 'Admin RW 04 Pisangan Jaya',
+                'password' => bcrypt('rahasia123'),
+                'role' => UserRole::AdminRW->value,
+                'kecamatan' => 'SEPATAN',
+                'desa' => 'PISANGAN JAYA',
+                'rw' => '4',
+                'created_by' => $adminWilayahSepatan->id,
+            ],
+        );
+
+        User::firstOrCreate(
+            ['email' => 'rt-sepatan@pispk.test'],
+            [
+                'name' => 'Admin RT 06 Pisangan Jaya',
+                'password' => bcrypt('rahasia123'),
+                'role' => UserRole::AdminRT->value,
+                'kecamatan' => 'SEPATAN',
+                'desa' => 'PISANGAN JAYA',
+                'rw' => '4',
+                'rt' => '6',
+                'created_by' => $adminWilayahSepatan->id,
+            ],
+        );
+
+        User::firstOrCreate(
+            ['email' => 'petugas-sepatan@pispk.test'],
+            [
+                'name' => 'Petugas Sari Sepatan',
+                'password' => bcrypt('rahasia123'),
+                'role' => UserRole::Petugas->value,
+                'kecamatan' => 'SEPATAN',
+                'desa' => 'PISANGAN JAYA',
+                'rw' => '4',
+                'rt' => '6',
+                'created_by' => $adminWilayahSepatan->id,
+            ],
+        );
     }
 }

@@ -182,6 +182,7 @@ window.showToast = showToast;
         'nama kepala keluarga': 'kepala_keluarga',
         'nama kepala': 'kepala_keluarga',
         'kepala keluarga': 'kepala_keluarga',
+        'nama kk': 'kepala_keluarga',
         'no kk': 'no_kk',
         'nomor kk': 'no_kk',
         'no. kk': 'no_kk',
@@ -282,6 +283,108 @@ window.showToast = showToast;
         return family;
     };
 
+    const normKey = (value) => String(value ?? '').trim().toLowerCase().replace(/\s+/g, ' ');
+
+    const pwsNorm = (value) => String(value ?? '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '');
+
+    const isPwsFile = (rows) => {
+        if (!rows.length) return false;
+        const keys = Object.keys(rows[0]).map(normKey);
+        return keys.includes('nama art') && keys.includes('no urut');
+    };
+
+    const pwsLookup = (row, name) => {
+        const wanted = pwsNorm(name);
+        const actual = Object.keys(row).find((key) => pwsNorm(key) === wanted);
+        return actual === undefined ? undefined : row[actual];
+    };
+
+    const pwsAnswer = (value) => {
+        const text = String(value ?? '').trim().toUpperCase();
+        return text === 'Y' ? 'Y' : text === 'T' ? 'T' : 'N';
+    };
+
+    const pwsAgg = (values) => (
+        values.includes('Y') ? 'Y' : values.includes('T') ? 'T' : 'N'
+    );
+
+    const pwsDiagnosedTreated = (rows, diagName, treatName) => {
+        const diag = rows.map((row) => pwsAnswer(pwsLookup(row, diagName)));
+        if (!diag.includes('Y')) return 'N';
+        const treated = rows
+            .filter((row, index) => diag[index] === 'Y')
+            .map((row) => pwsAnswer(pwsLookup(row, treatName)));
+        if (treated.includes('Y')) return 'Y';
+        if (treated.includes('T')) return 'T';
+        return 'N';
+    };
+
+    const buildPwsDrafts = (pwsRows) => {
+        const groups = new Map();
+
+        const keyOf = (row) => ['kecamatan', 'kelurahan', 'rw', 'rt', 'nama kk', 'no. kk', 'alamat', 'no urut keluarga']
+            .map((name) => String(pwsLookup(row, name) ?? '').trim())
+            .join('|');
+
+        pwsRows.forEach((row) => {
+            const key = keyOf(row);
+            if (!groups.has(key)) groups.set(key, []);
+            groups.get(key).push(row);
+        });
+
+        return Array.from(groups.values()).map((rows) => {
+            const head = rows[0];
+
+            const anggota = rows.map((row) => {
+                const sex = String(pwsLookup(row, 'jenis kelamin') ?? '').trim().toLowerCase();
+                const umur = pwsLookup(row, 'umur(tahun)');
+                return {
+                    nama: String(pwsLookup(row, 'nama art') ?? '').trim(),
+                    umur: umur === undefined || umur === '' ? '' : String(umur).trim(),
+                    jenis_kelamin: sex.startsWith('perempuan') || sex.startsWith('p') ? 'P' : 'L',
+                    hubungan: String(pwsLookup(row, 'hubungan keluarga') ?? '').trim(),
+                    nik: String(pwsLookup(row, 'nik') ?? '').trim(),
+                };
+            });
+
+            const merokok = rows.map((row) => pwsAnswer(pwsLookup(row, 'merokok')));
+            const jiwa = pwsDiagnosedTreated(rows, 'ada art di diagnosis gangguan jiwa berat', 'art minum obat gangguan jiwa berat teratur');
+
+            const airFamily = pwsAnswer(pwsLookup(head, 'tersedia sarana air bersih'));
+            const jambanFamily = pwsAnswer(pwsLookup(head, 'tersedia jamban keluarga'));
+            const air = airFamily !== 'N' ? airFamily : pwsAgg(rows.map((row) => pwsAnswer(pwsLookup(row, 'perilaku penggunaan air bersih'))));
+            const jamban = jambanFamily !== 'N' ? jambanFamily : pwsAgg(rows.map((row) => pwsAnswer(pwsLookup(row, 'perilaku bab di jamban'))));
+
+            return {
+                kepala_keluarga: String(pwsLookup(head, 'nama kk') ?? '').trim(),
+                no_kk: String(pwsLookup(head, 'no. kk') ?? '').trim(),
+                jalan: String(pwsLookup(head, 'alamat') ?? '').trim(),
+                rt: String(pwsLookup(head, 'rt') ?? '').trim(),
+                rw: String(pwsLookup(head, 'rw') ?? '').trim(),
+                desa: String(pwsLookup(head, 'kelurahan') ?? '').trim(),
+                kecamatan: String(pwsLookup(head, 'kecamatan') ?? '').trim(),
+                surveyor: String(pwsLookup(head, 'surveyor') ?? '').trim(),
+                tanggal: '',
+                catatan: '',
+                indikator: {
+                    kb: pwsAgg(rows.map((row) => pwsAnswer(pwsLookup(row, 'menggunakan kb')))),
+                    bersalin: pwsAgg(rows.map((row) => pwsAnswer(pwsLookup(row, 'persalinan di faskes')))),
+                    imunisasi: pwsAgg(rows.map((row) => pwsAnswer(pwsLookup(row, 'imunisasi lengkap')))),
+                    asi: pwsAgg(rows.map((row) => pwsAnswer(pwsLookup(row, 'asi ekslusif')))),
+                    balita: pwsAgg(rows.map((row) => pwsAnswer(pwsLookup(row, 'pemantauan pertumbuhan balita')))),
+                    tb: pwsDiagnosedTreated(rows, 'di diagnosis tb paru', 'minum obat tb teratur'),
+                    hipertensi: pwsDiagnosedTreated(rows, 'di diagnosis hipertensi', 'minum obat hipertensi teratur'),
+                    jiwa: jiwa === 'Y' ? 'Y' : pwsAgg(rows.map((row) => pwsAnswer(pwsLookup(row, 'ada art dipasung')))) === 'Y' ? 'T' : jiwa,
+                    rokok: merokok.includes('Y') ? 'T' : merokok.includes('T') ? 'Y' : 'N',
+                    jkn: pwsAgg(rows.map((row) => pwsAnswer(pwsLookup(row, 'kepesertaan jkn')))),
+                    air,
+                    jamban,
+                },
+                anggota,
+            };
+        });
+    };
+
     const iksOf = (family) => {
         let ya = 0;
         let tidak = 0;
@@ -347,15 +450,21 @@ window.showToast = showToast;
             return;
         }
 
-        state.drafts = state.rawRows.map((row, index) => {
-            const family = mapRow(row);
+        const draftOf = (family, index) => {
             const ok = Boolean(family.kepala_keluarga);
             return {
                 ok,
                 family,
                 label: family.kepala_keluarga ? addressOf(family) || '(tanpa alamat)' : 'Baris ' + (index + 1) + ': nama kepala keluarga kosong',
             };
-        });
+        };
+
+        if (isPwsFile(state.rawRows)) {
+            let next = 0;
+            state.drafts = buildPwsDrafts(state.rawRows).map((family) => draftOf(family, next++));
+        } else {
+            state.drafts = state.rawRows.map((row, index) => draftOf(mapRow(row), index));
+        }
 
         renderDrafts();
     });
@@ -411,20 +520,28 @@ window.showToast = showToast;
         saveBtn.textContent = 'Menyimpan...';
 
         try {
-            const response = await fetch(storeUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-                },
-                body: JSON.stringify({ rows }),
-            });
+            const CHUNK = 900;
 
-            const data = await response.json();
+            for (let start = 0; start < rows.length; start += CHUNK) {
+                const slice = rows.slice(start, start + CHUNK);
 
-            if (!response.ok) {
-                throw new Error(data.message || 'Impor gagal.');
+                saveBtn.textContent = 'Menyimpan... (' + Math.min(start + CHUNK, rows.length) + '/' + rows.length + ')';
+
+                const response = await fetch(storeUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                    },
+                    body: JSON.stringify({ rows: slice }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Impor gagal.');
+                }
             }
 
             window.location.href = indexUrl;

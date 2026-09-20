@@ -21,13 +21,4 @@
         </div>
     @endforeach
 
-    <div class="card">
-        <h3>Cara menghitung Indeks Keluarga Sehat (IKS)</h3>
-        <p style="color:var(--ink-soft);">IKS = (jumlah indikator "Ya") &divide; (jumlah indikator "Ya" + jumlah indikator "Tidak"). Indikator yang tidak berlaku bagi keluarga tersebut dikeluarkan dari perhitungan.</p>
-        <p style="color:var(--ink-soft);">
-            <span class="badge sehat">Keluarga Sehat</span> IKS &gt; 0.80 &nbsp;
-            <span class="badge pra">Pra-Sehat</span> 0.50 &ndash; 0.80 &nbsp;
-            <span class="badge tidak">Tidak Sehat</span> IKS &lt; 0.50
-        </p>
-    </div>
-@endsection
+    @endsection

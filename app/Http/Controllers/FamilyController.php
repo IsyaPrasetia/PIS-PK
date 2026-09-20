@@ -5,29 +5,92 @@ namespace App\Http\Controllers;
 use App\Http\Requests\FamilyRequest;
 use App\Models\AiTrainingLog;
 use App\Models\Family;
+use App\Models\Wilayah;
 use App\Support\Indikator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
-
 class FamilyController extends Controller
 {
     public function index(Request $request): View
     {
-        $term = $request->query('q');
+        $user = Auth::user();
+
+        $filters = [
+            'kecamatan' => trim((string) $request->query('kecamatan')),
+            'desa' => trim((string) $request->query('desa')),
+            'rw' => trim((string) $request->query('rw')),
+            'rt' => trim((string) $request->query('rt')),
+        ];
+
+        $perPage = (int) $request->query('per_page', 50);
+        $perPage = in_array($perPage, [50, 75, 100], true) ? $perPage : 50; // sane default
 
         $families = Family::query()
-            ->scopedFor(Auth::user())
-            ->search($term)
+            ->scopedFor($user)
+            ->search($request->query('q'))
+            ->cascadeWilayah($filters)
             ->withCount('members')
             ->orderByDesc('updated_at')
-            ->get();
+            ->paginate($perPage)
+            ->withQueryString();
 
         return view('families.index', [
             'families' => $families,
-            'term' => (string) $term,
+            'term' => (string) $request->query('q'),
+            'filters' => $filters,
+            'perPage' => $perPage,
+            'wilayahTree' => $this->wilayahTree($user),
         ]);
+    }
+
+    /**
+     * Struktur hierarki wilayah untuk filter berjenjang, dari master data, dibatasi scope pengguna.
+     *
+     * @return array<string, array<string, array<string, list<string>>>>
+     */
+    private function wilayahTree($user): array
+    {
+        $kecamatans = Wilayah::kecamatans();
+
+        if (! $user->isSuperadmin()) {
+            $kecamatans = array_values(array_filter($kecamatans, fn ($kecamatan) => $kecamatan === $user->kecamatan));
+        }
+
+        $tree = [];
+
+        foreach ($kecamatans as $kecamatan) {
+            $tree[$kecamatan] = [];
+
+            $desas = Wilayah::desas($kecamatan);
+
+            if (! $user->isSuperadmin() && $user->desa) {
+                $desas = array_values(array_filter($desas, fn ($desa) => $desa === $user->desa));
+            }
+
+            foreach ($desas as $desa) {
+                $tree[$kecamatan][$desa] = [];
+
+                $rws = Wilayah::rws($kecamatan, $desa);
+
+                if (! $user->isSuperadmin() && $user->rw) {
+                    $rws = array_values(array_filter($rws, fn ($rw) => $rw === $user->rw));
+                }
+
+                foreach ($rws as $rw) {
+                    $rts = Wilayah::rts($kecamatan, $desa, $rw);
+
+                    if (! $user->isSuperadmin() && $user->rt) {
+                        $rts = array_values(array_filter($rts, fn ($rt) => $rt === $user->rt));
+                    }
+
+                    $tree[$kecamatan][$desa][$rw] = $rts;
+                }
+            }
+        }
+
+        return $tree;
     }
 
     public function create(): View

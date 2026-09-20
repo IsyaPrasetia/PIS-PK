@@ -728,6 +728,78 @@ label {
     margin-top: 18px;
 }
 
+.seg-chip {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--primary-dark);
+    font-size: 11.5px;
+    line-height: 1.6;
+    margin: 1px 4px 1px 0;
+}
+
+.seg-flag {
+    display: inline-block;
+    margin-top: 4px;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--clay);
+    background: var(--clay-tint);
+    border-radius: 4px;
+    padding: 1px 6px;
+}
+
+.score-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.lvl {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.lvl.rendah {
+    color: var(--success);
+}
+
+.lvl.sedang {
+    color: var(--amber);
+}
+
+.lvl.tinggi,
+.lvl.sangat_tinggi {
+    color: var(--clay);
+}
+
+.seg-fill {
+    background: var(--primary);
+}
+
+.seg-fill.sedang {
+    background: var(--amber);
+}
+
+.seg-fill.tinggi,
+.seg-fill.sangat_tinggi {
+    background: var(--clay);
+}
+
+.seg-reasons {
+    margin: 0;
+    padding-left: 16px;
+    color: var(--ink-soft);
+    font-size: 12.5px;
+    line-height: 1.6;
+}
+
 .toast {
     position: fixed;
     bottom: 22px;
