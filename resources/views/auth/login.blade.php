@@ -11,7 +11,7 @@
     <div class="auth-wrap">
         <div class="auth-card">
             <div class="auth-header">
-                <div class="mark">PIS-PK</div>
+                <div class="mark">SIPANDAI</div>
                 <div class="app-name">Pendataan Keluarga Sehat</div>
             </div>
 

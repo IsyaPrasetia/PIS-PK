@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('page-title', 'PIS-PK') — Pendataan Keluarga Sehat</title>
+    <title>@yield('page-title', 'SIPANDAI') — Pendataan Keluarga Sehat</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>
@@ -27,7 +27,7 @@
 <div id="app">
     <div class="sidebar">
         <div class="brand">
-            <div class="mark">PIS-PK</div>
+            <div class="mark">SIPANDAI</div>
             <div class="sub">Pendataan Keluarga Sehat<br>Pendekatan Keluarga</div>
         </div>
         <div class="sidebar-nav">

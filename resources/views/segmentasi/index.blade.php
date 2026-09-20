@@ -2,7 +2,7 @@
 
 @section('page-title', 'Segmentasi Keluarga')
 @section('title', 'Segmentasi Keluarga')
-@section('subtitle', 'Pengelompokan keluarga berdasarkan kebutuhan, risiko, dan kualitas data — prioritas tindak lanjut PIS-PK.')
+@section('subtitle', 'Pengelompokan keluarga berdasarkan kebutuhan, risiko, dan kualitas data — prioritas tindak lanjut keluarga.')
 
 @section('content')
     <form method="GET" action="{{ route('segmentasi.index') }}" class="card indikator-filters" id="indikator-filters" style="margin-bottom:16px;">

@@ -2,7 +2,7 @@
 
 @section('page-title', 'Dasbor')
 @section('title', 'Dasbor Keluarga Sehat')
-@section('subtitle', 'Ringkasan capaian 12 indikator PIS-PK di wilayah kerja Anda.')
+@section('subtitle', 'Ringkasan capaian 12 indikator kesehatan keluarga di wilayah kerja Anda.')
 
 @section('content')
     @if ($families->isEmpty())
